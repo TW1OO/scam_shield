@@ -1,6 +1,9 @@
 from fastapi import FastAPI
+from routers import chat
 
-app = FastAPI() #사용할 서버 만들기
+app = FastAPI(title="Scam Shield API")
+
+app.include_router(chat.router)
 
 @app.get("/")
 def root():

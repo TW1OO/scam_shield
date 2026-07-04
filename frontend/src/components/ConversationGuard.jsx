@@ -1,7 +1,4 @@
 import { useState } from "react";
-import { imageToBase64 } from "../utils/imageToBase64";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL; // .env에 추가 필요
 
 export default function ConversationGuard({
     setShowBottomBar,
@@ -47,7 +44,7 @@ export default function ConversationGuard({
     });
 
     const analyzeText = async () => {
-        const response = await fetch(`${API_BASE}/chat/analyze`, {
+        const response = await fetch("/api/chat/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -63,15 +60,28 @@ export default function ConversationGuard({
         return await response.json();
     };
 
+    const analyzeImage = async () => {
+        const formData = new FormData();
+        formData.append("file", image);
+
+        const response = await fetch("/api/chat/analyze-image", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || "분석 요청 실패");
+        }
+
+        return await response.json();
+    };
+
     const runAnalysis = async () => {
         setLoading(true);
         try {
-            if (mode === "image") {
-                alert("이미지 분석은 아직 백엔드에서 지원하지 않습니다.");
-                return;
-            }
-
-            const backendResult = await analyzeText();
+            const backendResult =
+                mode === "image" ? await analyzeImage() : await analyzeText();
             const parsed = mapBackendResponse(backendResult);
 
             setAnalysisResult(parsed);

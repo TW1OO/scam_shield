@@ -7,3 +7,7 @@
 # Python 캐시
 __pycache__/
 *.pyc
+
+# 런타임 생성 파일
+*.db
+extract_debug*.json

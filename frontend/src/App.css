@@ -2111,3 +2111,126 @@ input:focus-visible{
     display:none;
 
 }
+/* PR7: multi-image upload preview grid */
+
+.image-add-btn{
+
+    width:100%;
+
+    aspect-ratio:1;
+
+    border:2px dashed #CBD5E1;
+
+    border-radius:16px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    cursor:pointer;
+
+    background:#F8FAFC;
+
+}
+
+.image-add-btn.large{
+
+    width:100%;
+
+    height:180px;
+
+}
+
+.image-add-btn:hover{
+
+    border-color:#2563EB;
+
+    background:#EFF6FF;
+
+}
+
+.image-add-content{
+
+    text-align:center;
+
+}
+
+.plus-icon{
+
+    font-size:36px;
+
+    color:#2563EB;
+
+    margin-bottom:8px;
+
+}
+
+.preview-main{
+
+    width:100%;
+
+    max-height:320px;
+
+    object-fit:contain;
+
+    border-radius:18px;
+
+    background:#F8FAFC;
+
+    border:1px solid #E5E7EB;
+
+}
+
+.preview-item{
+
+    position:relative;
+
+}
+
+.preview-thumb{
+
+    width:100%;
+
+    aspect-ratio:1;
+
+    object-fit:cover;
+
+    border-radius:12px;
+
+}
+
+.preview-remove{
+
+    position:absolute;
+
+    top:6px;
+
+    right:6px;
+
+    width:26px;
+
+    height:26px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#EF4444;
+
+    color:#fff;
+
+    cursor:pointer;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+}
+
+.preview-remove:hover{
+
+    background:#DC2626;
+
+}

@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
-from services.chat_service import analyze_chat
+from services.chat_service import analyze_chat, extract_messages_from_image, InvalidAIResponseError
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -22,6 +22,10 @@ class ChatResponse(BaseModel):
     recommendation: str
 
 
+class ImageAnalyzeResponse(ChatResponse):
+    extracted_messages: list[ChatMessage]
+
+
 @router.post("/analyze", response_model=ChatResponse)
 def analyze(request: ChatRequest):
     messages = [{"sender": m.sender, "content": m.content} for m in request.messages]
@@ -29,5 +33,34 @@ def analyze(request: ChatRequest):
     if not messages:
         raise HTTPException(status_code=400, detail="채팅 내역이 비어 있습니다.")
 
-    result = analyze_chat(messages)
+    try:
+        result = analyze_chat(messages)
+    except InvalidAIResponseError:
+        raise HTTPException(status_code=502, detail="AI 응답을 처리하지 못했습니다. 다시 시도해주세요.")
+
     return result
+
+
+@router.post("/analyze-image", response_model=ImageAnalyzeResponse)
+async def analyze_image(file: UploadFile = File(...)):
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="이미지 파일만 업로드할 수 있습니다.")
+
+    image_bytes = await file.read()
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="이미지가 비어 있습니다.")
+
+    try:
+        messages = extract_messages_from_image(image_bytes, mime_type=file.content_type)
+    except InvalidAIResponseError:
+        raise HTTPException(status_code=502, detail="AI 응답을 처리하지 못했습니다. 다시 시도해주세요.")
+
+    if not messages:
+        raise HTTPException(status_code=422, detail="이미지에서 채팅 내역을 찾을 수 없습니다.")
+
+    try:
+        result = analyze_chat(messages)
+    except InvalidAIResponseError:
+        raise HTTPException(status_code=502, detail="AI 응답을 처리하지 못했습니다. 다시 시도해주세요.")
+
+    return {**result, "extracted_messages": messages}

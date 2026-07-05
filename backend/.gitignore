@@ -8,8 +8,11 @@
 __pycache__/
 *.pyc
 
-#녹화파일
+# 녹화파일
 recordings/
 
+# 데이터베이스
+*.db
 
-scam_shield.db
+# 디버그 파일
+extract_debug*.json

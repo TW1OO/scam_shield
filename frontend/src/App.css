@@ -2100,6 +2100,12 @@ input:focus-visible{
 
 }
 
+.primary-btn--image{
+
+    margin-top:20px;
+
+}
+
 .upload-btn input{
 
     display:none;

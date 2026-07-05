@@ -155,9 +155,8 @@ export default function ConversationGuard({
                         )}
                     </>
                 )}
-
                 <button
-                    className="primary-btn"
+                    className={mode === "image" ? "primary-btn primary-btn--image" : "primary-btn"}
                     disabled={!canAnalyze() || loading}
                     onClick={runAnalysis}
                 >

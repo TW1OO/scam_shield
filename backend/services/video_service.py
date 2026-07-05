@@ -60,7 +60,6 @@ def extract_frames(video_path: str, interval: int = 30):
             if success:
                 frame_paths.append(frame_path)
 
-            print(f"저장: {frame_path} / 성공 여부: {success}")
 
             saved_index += 1
 

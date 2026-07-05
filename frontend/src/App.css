@@ -2111,7 +2111,6 @@ input:focus-visible{
     display:none;
 
 }
-
 /* multi-image upload preview grid */
 
 .preview-grid{
@@ -2121,58 +2120,6 @@ input:focus-visible{
     grid-template-columns:repeat(3, 1fr);
 
     gap:10px;
-
-}
-
-.preview-item{
-
-    position:relative;
-
-}
-
-.preview-thumb{
-
-    width:100%;
-
-    aspect-ratio:1;
-
-    object-fit:cover;
-
-    border-radius:12px;
-
-}
-
-.preview-remove{
-
-    position:absolute;
-
-    top:6px;
-
-    right:6px;
-
-    width:26px;
-
-    height:26px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:#EF4444;
-
-    color:#fff;
-
-    cursor:pointer;
-
-    font-size:13px;
-
-    font-weight:bold;
-
-}
-
-.preview-remove:hover{
-
-    background:#DC2626;
 
 }
 
@@ -2227,5 +2174,57 @@ input:focus-visible{
     color:#2563EB;
 
     margin-bottom:8px;
+
+}
+
+.preview-item{
+
+    position:relative;
+
+}
+
+.preview-thumb{
+
+    width:100%;
+
+    aspect-ratio:1;
+
+    object-fit:cover;
+
+    border-radius:12px;
+
+}
+
+.preview-remove{
+
+    position:absolute;
+
+    top:6px;
+
+    right:6px;
+
+    width:26px;
+
+    height:26px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#EF4444;
+
+    color:#fff;
+
+    cursor:pointer;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+}
+
+.preview-remove:hover{
+
+    background:#DC2626;
 
 }

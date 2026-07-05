@@ -11,3 +11,7 @@ __pycache__/
 # 런타임 생성 파일
 *.db
 extract_debug*.json
+
+#음성 및 영상
+frames/
+recordings/

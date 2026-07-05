@@ -1,4 +1,4 @@
-from openai import OpenAI
+from openai import OpenAI, APITimeoutError
 from dotenv import load_dotenv
 from io import BytesIO
 from PIL import Image
@@ -15,9 +15,22 @@ client = OpenAI(
 
 VISION_MODEL = "meta/llama-3.2-90b-vision-instruct"
 
+REQUEST_TIMEOUT = 45.0
+
 
 class InvalidAIResponseError(Exception):
     pass
+
+
+def _create_completion(**kwargs):
+    try:
+        return client.chat.completions.create(timeout=REQUEST_TIMEOUT, **kwargs)
+    except APITimeoutError:
+        try:
+            return client.chat.completions.create(timeout=REQUEST_TIMEOUT, **kwargs)
+        except APITimeoutError as e:
+            raise InvalidAIResponseError("AI 응답 시간이 초과되었습니다. 다시 시도해주세요.") from e
+
 
 CHUNK_ASPECT_THRESHOLD = 2.2
 CHUNK_HEIGHT_RATIO = 1.8
@@ -79,7 +92,7 @@ def analyze_chat(messages: list[dict]) -> dict:
         f"[{msg['sender']}]: {msg['content']}" for msg in messages
     )
 
-    response = client.chat.completions.create(
+    response = _create_completion(
         model="meta/llama-3.3-70b-instruct",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -155,7 +168,7 @@ def _drop_leading_duplicates(accumulated: list[dict], new_messages: list[dict]) 
 def _extract_messages_from_chunk(image_bytes: bytes, mime_type: str) -> list[dict]:
     encoded = base64.b64encode(image_bytes).decode("utf-8")
 
-    response = client.chat.completions.create(
+    response = _create_completion(
         model=VISION_MODEL,
         messages=[
             {"role": "system", "content": OCR_SYSTEM_PROMPT},

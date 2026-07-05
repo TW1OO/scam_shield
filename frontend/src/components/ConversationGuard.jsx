@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const MAX_IMAGES = 10;
+
 export default function ConversationGuard({
     setShowBottomBar,
     setAnalysisResult,
@@ -8,26 +10,46 @@ export default function ConversationGuard({
 
     const [mode, setMode] = useState("text");
     const [text, setText] = useState("");
-    const [image, setImage] = useState(null);
-    const [preview, setPreview] = useState(null);
+    const [images, setImages] = useState([]);
+    const [previews, setPreviews] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const handleFile = (file) => {
-        if (!file) return;
-        setImage(file);
-        setPreview(URL.createObjectURL(file));
+    const changeMode = (newMode) => {
+        setMode(newMode);
+        setText("");
+        setImages([]);
+        setPreviews([]);
     };
 
-    const removeImage = () => {
-        setImage(null);
-        setPreview(null);
+    const handleFile = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const remain = MAX_IMAGES - images.length;
+        const selected = files.slice(0, remain);
+
+        setImages((prev) => [...prev, ...selected]);
+        setPreviews((prev) => [
+            ...prev,
+            ...selected.map((file) => URL.createObjectURL(file)),
+        ]);
+    };
+
+    const removeImage = (index) => {
+        setImages((prev) => prev.filter((_, i) => i !== index));
+        setPreviews((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const clearImages = () => {
+        setImages([]);
+        setPreviews([]);
     };
 
     const canAnalyze = () => {
         if (mode === "text") {
             return text.trim().length >= 5;
         }
-        return image !== null;
+        return images.length > 0;
     };
 
     // 백엔드 응답을 기존 컴포넌트가 기대하는 형식으로 변환
@@ -62,7 +84,7 @@ export default function ConversationGuard({
 
     const analyzeImage = async () => {
         const formData = new FormData();
-        formData.append("file", image);
+        images.forEach((image) => formData.append("files", image));
 
         const response = await fetch("/api/chat/analyze-image", {
             method: "POST",
@@ -106,13 +128,13 @@ export default function ConversationGuard({
                 <div className="input-selector">
                     <button
                         className={mode === "text" ? "selector-btn active" : "selector-btn"}
-                        onClick={() => setMode("text")}
+                        onClick={() => changeMode("text")}
                     >
                         텍스트 입력
                     </button>
                     <button
                         className={mode === "image" ? "selector-btn active" : "selector-btn"}
-                        onClick={() => setMode("image")}
+                        onClick={() => changeMode("image")}
                     >
                         캡처 업로드
                     </button>
@@ -134,27 +156,62 @@ export default function ConversationGuard({
 
                 {mode === "image" && (
                     <>
-                        {!preview && (
-                            <label className="upload-zone">
+                        {previews.length > 0 && (
+                            <div className="preview-grid">
+                                {previews.map((img, index) => (
+                                    <div className="preview-item" key={index}>
+                                        <img src={img} alt="" className="preview-thumb" />
+                                        <button
+                                            className="preview-remove"
+                                            onClick={() => removeImage(index)}
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+
+                                {images.length < MAX_IMAGES && (
+                                    <label className="image-add-btn">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            hidden
+                                            onChange={handleFile}
+                                        />
+                                        <div className="image-add-content">
+                                            <div className="plus-icon">＋</div>
+                                            <div>추가</div>
+                                        </div>
+                                    </label>
+                                )}
+                            </div>
+                        )}
+
+                        {previews.length === 0 && (
+                            <label className="image-add-btn large">
                                 <input
                                     type="file"
                                     accept="image/*"
+                                    multiple
                                     hidden
-                                    onChange={(e) => handleFile(e.target.files[0])}
+                                    onChange={handleFile}
                                 />
-                                이미지 선택
+                                <div className="image-add-content">
+                                    <div className="plus-icon">＋</div>
+                                    <div>이미지 선택</div>
+                                </div>
                             </label>
                         )}
-                        {preview && (
-                            <div className="preview-wrap">
-                                <img src={preview} alt="" className="preview-image" />
-                                <button className="remove-btn" onClick={removeImage}>
-                                    제거
-                                </button>
-                            </div>
+
+                        {images.length > 0 && (
+                            <button className="remove-btn" onClick={clearImages}>
+                                🗑 전체 삭제
+                            </button>
                         )}
                     </>
                 )}
+
                 <button
                     className={mode === "image" ? "primary-btn primary-btn--image" : "primary-btn"}
                     disabled={!canAnalyze() || loading}

@@ -2111,7 +2111,17 @@ input:focus-visible{
     display:none;
 
 }
-/* PR7: multi-image upload preview grid */
+/* multi-image upload preview grid */
+
+.preview-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(3, 1fr);
+
+    gap:10px;
+
+}
 
 .image-add-btn{
 
@@ -2164,22 +2174,6 @@ input:focus-visible{
     color:#2563EB;
 
     margin-bottom:8px;
-
-}
-
-.preview-main{
-
-    width:100%;
-
-    max-height:320px;
-
-    object-fit:contain;
-
-    border-radius:18px;
-
-    background:#F8FAFC;
-
-    border:1px solid #E5E7EB;
 
 }
 

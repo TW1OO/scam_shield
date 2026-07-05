@@ -7,3 +7,9 @@
 # Python 캐시
 __pycache__/
 *.pyc
+
+#녹화파일
+recordings/
+
+
+scam_shield.db

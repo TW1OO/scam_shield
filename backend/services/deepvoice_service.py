@@ -14,11 +14,10 @@ def detect_ai_voice(audio_path: str):
     """
     result = client.detect_file(audio_path)
 
-    return result
-    """
     return {
-        "is_ai": False,
-        "confidence": 0.0,
-        "provider": ""
-    }
-    """ # 반환값 확인하기
+        "is_ai": result["status"] != "AUTHENTIC",
+        "status": result["status"],
+        "confidence": result["score"],
+        "provider": "Reality Defender",
+        "models": result["models"],
+        }

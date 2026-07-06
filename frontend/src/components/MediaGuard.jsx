@@ -15,7 +15,9 @@ export default function MediaGuard({
     const [risk, setRisk] = useState(null);
     const [audioFile, setAudioFile] = useState(null);
     const [fileName, setFileName] = useState("");
-    const [analysisMode, setAnalysisMode] = useState(null); // "record" 또는 "file"
+    const [videoFile, setVideoFile] = useState(null);
+    const [videoFileName, setVideoFileName] = useState("");
+    const [analysisMode, setAnalysisMode] = useState(null); // "record" | "file" | "video"
     const [loading, setLoading] = useState(false);
 
     const startScan = () => {
@@ -38,6 +40,14 @@ export default function MediaGuard({
         setAudioFile(file);
         setFileName(file.name);
         setAnalysisMode("file");
+    };
+
+    const handleVideoFile = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setVideoFile(file);
+        setVideoFileName(file.name);
+        setAnalysisMode("video");
     };
 
     // 백엔드 응답 -> 기존 컴포넌트가 기대하는 형식으로 변환
@@ -70,6 +80,40 @@ export default function MediaGuard({
         return await response.json();
     };
 
+    const analyzeAudioFile = async () => {
+        const formData = new FormData();
+        formData.append("file", audioFile);
+
+        const response = await fetch(`${API_BASE}/deepvoice/analyze`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || "분석 요청 실패");
+        }
+
+        return await response.json();
+    };
+
+    const analyzeVideoFile = async () => {
+        const formData = new FormData();
+        formData.append("file", videoFile);
+
+        const response = await fetch(`${API_BASE}/video/analyze`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || "분석 요청 실패");
+        }
+
+        return await response.json();
+    };
+
     const analyzeAudio = async () => {
         setLoading(true);
 
@@ -91,7 +135,24 @@ export default function MediaGuard({
             }
 
             if (analysisMode === "file") {
-                alert("음성 파일 분석은 아직 백엔드에서 지원하지 않습니다. (텍스트 변환 기능 필요)");
+                const backendResult = await analyzeAudioFile();
+                const parsed = mapBackendResponse(backendResult);
+
+                setRisk(parsed.riskPercentage);
+                setAnalysisResult(parsed);
+                setShowBottomBar(true);
+                openBottomSheet();
+                return;
+            }
+
+            if (analysisMode === "video") {
+                const backendResult = await analyzeVideoFile();
+                const parsed = mapBackendResponse(backendResult);
+
+                setRisk(parsed.riskPercentage);
+                setAnalysisResult(parsed);
+                setShowBottomBar(true);
+                openBottomSheet();
                 return;
             }
 
@@ -129,8 +190,9 @@ export default function MediaGuard({
                     <div className="scan-sub">
                         {analysisMode === "record" &&
                             (isScanning ? "실시간 녹음 중..." : "녹음 완료")}
-                        {analysisMode === "file" && `선택된 파일 : ${fileName}`}
-                        {!analysisMode && "녹음 또는 음성 파일을 선택하세요."}
+                        {analysisMode === "file" && `선택된 음성 파일 : ${fileName}`}
+                        {analysisMode === "video" && `선택된 영상 파일 : ${videoFileName}`}
+                        {!analysisMode && "녹음 또는 음성/영상 파일을 선택하세요."}
                     </div>
 
                     {isScanning && (
@@ -168,6 +230,16 @@ export default function MediaGuard({
                         />
                     </label>
 
+                    <label className="upload-btn">
+                        <span>🎬 영상 파일 선택</span>
+                        <input
+                            type="file"
+                            accept=".mp4,.mov,.avi,video/*"
+                            hidden
+                            onChange={handleVideoFile}
+                        />
+                    </label>
+
                     <button
                         className="primary-btn"
                         onClick={analyzeAudio}
@@ -180,17 +252,11 @@ export default function MediaGuard({
                         <div className="loading-wrap">
                             <div className="loading-bar"></div>
                             <div style={{ marginTop: 10, color: "#666" }}>
-                                AI가 음성을 분석 중입니다...
+                                AI가 분석 중입니다...
                             </div>
                         </div>
                     )}
                 </div>
-
-                {fileName && (
-                    <div style={{ marginTop: 15, color: "#666", fontSize: 14 }}>
-                        선택된 파일 : {fileName}
-                    </div>
-                )}
             </div>
 
             {risk !== null && (

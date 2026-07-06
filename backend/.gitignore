@@ -16,3 +16,7 @@ recordings/
 
 # 디버그 파일
 extract_debug*.json
+
+# 음성 및 영상
+frames/
+recordings/

@@ -8,6 +8,11 @@
 __pycache__/
 *.pyc
 
-# 런타임 생성 파일
+# 녹화파일
+recordings/
+
+# 데이터베이스
 *.db
+
+# 디버그 파일
 extract_debug*.json

@@ -56,19 +56,24 @@ def analyze(request: ChatRequest):
 
 
 @router.post("/analyze-image", response_model=ImageAnalyzeResponse)
-async def analyze_image(file: UploadFile = File(...)):
-    """채팅 스크린샷 1장을 업로드받아: 대화 추출 -> 위험도 분석 순으로 처리한다."""
-    if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="이미지 파일만 업로드할 수 있습니다.")
+async def analyze_image(files: list[UploadFile] = File(...)):
+    for file in files:
+        if not file.content_type or not file.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="이미지 파일만 업로드할 수 있습니다.")
 
-    image_bytes = await file.read()
-    if not image_bytes:
+    image_payloads = [(await f.read(), f.content_type) for f in files]
+    if not any(data for data, _ in image_payloads):
         raise HTTPException(status_code=400, detail="이미지가 비어 있습니다.")
 
     try:
-        messages = extract_messages_from_image(image_bytes, mime_type=file.content_type)
+        per_image_messages = await asyncio.gather(*[
+            asyncio.to_thread(extract_messages_from_image, data, mime_type=mime_type)
+            for data, mime_type in image_payloads
+        ])
     except InvalidAIResponseError:
         _raise_ai_timeout()
+
+    messages = [msg for chunk in per_image_messages for msg in chunk]
 
     if not messages:
         raise HTTPException(status_code=422, detail="이미지에서 채팅 내역을 찾을 수 없습니다.")

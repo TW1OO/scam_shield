@@ -8,8 +8,9 @@
 __pycache__/
 *.pyc
 
-# 녹화파일
+# 녹화파일/프레임파일
 recordings/
+frames/
 
 # 데이터베이스
 *.db

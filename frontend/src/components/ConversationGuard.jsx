@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 const MAX_IMAGES = 10;
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export default function ConversationGuard({
     setShowBottomBar,
@@ -9,16 +10,34 @@ export default function ConversationGuard({
 }) {
 
     const [mode, setMode] = useState("text");
-    const [text, setText] = useState("");
+    const [messages, setMessages] = useState([{ sender: "", content: "" }]);
     const [images, setImages] = useState([]);
     const [previews, setPreviews] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const changeMode = (newMode) => {
         setMode(newMode);
-        setText("");
+        setMessages([{ sender: "", content: "" }]);
         setImages([]);
         setPreviews([]);
+    };
+
+    const updateMessage = (index, field, value) => {
+        setMessages((prev) =>
+            prev.map((m, i) => (i === index ? { ...m, [field]: value } : m))
+        );
+    };
+
+    const addMessageRow = () => {
+        setMessages((prev) => [...prev, { sender: "", content: "" }]);
+    };
+
+    const removeMessageRow = (index) => {
+        if (messages.length <= 1) {
+            alert("입력 창이 하나만 남은 경우에는 삭제할 수 없습니다.");
+            return;
+        }
+        setMessages((prev) => prev.filter((_, i) => i !== index));
     };
 
     const handleFile = (e) => {
@@ -47,7 +66,7 @@ export default function ConversationGuard({
 
     const canAnalyze = () => {
         if (mode === "text") {
-            return text.trim().length >= 5;
+            return messages.some((m) => m.content.trim().length > 0);
         }
         return images.length > 0;
     };
@@ -66,12 +85,17 @@ export default function ConversationGuard({
     });
 
     const analyzeText = async () => {
-        const response = await fetch("/api/chat/analyze", {
+        const payload = messages
+            .filter((m) => m.content.trim().length > 0)
+            .map((m) => ({
+                sender: m.sender.trim() || "unknown",
+                content: m.content.trim(),
+            }));
+
+        const response = await fetch(`${API_BASE}/chat/analyze`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                messages: [{ sender: "unknown", content: text }],
-            }),
+            body: JSON.stringify({ messages: payload }),
         });
 
         if (!response.ok) {
@@ -86,7 +110,7 @@ export default function ConversationGuard({
         const formData = new FormData();
         images.forEach((image) => formData.append("files", image));
 
-        const response = await fetch("/api/chat/analyze-image", {
+        const response = await fetch(`${API_BASE}/chat/analyze-image`, {
             method: "POST",
             body: formData,
         });
@@ -141,17 +165,36 @@ export default function ConversationGuard({
                 </div>
 
                 {mode === "text" && (
-                    <>
-                        <textarea
-                            className="text-input-area"
-                            value={text}
-                            onChange={(e) => setText(e.target.value)}
-                            placeholder="의심되는 대화를 붙여넣으세요."
-                        />
-                        <div className="text-input-counter">
-                            {text.length} / 1000
-                        </div>
-                    </>
+                    <div className="message-list">
+                        {messages.map((m, index) => (
+                            <div className="message-row" key={index}>
+                                <input
+                                    className="message-name"
+                                    type="text"
+                                    value={m.sender}
+                                    onChange={(e) => updateMessage(index, "sender", e.target.value)}
+                                    placeholder="이름"
+                                />
+                                <input
+                                    className="message-content"
+                                    type="text"
+                                    value={m.content}
+                                    onChange={(e) => updateMessage(index, "content", e.target.value)}
+                                    placeholder="내용"
+                                />
+                                <button
+                                    className="message-remove"
+                                    onClick={() => removeMessageRow(index)}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        ))}
+
+                        <button className="message-add-btn" onClick={addMessageRow}>
+                            ＋ 메시지 추가
+                        </button>
+                    </div>
                 )}
 
                 {mode === "image" && (
@@ -213,7 +256,11 @@ export default function ConversationGuard({
                 )}
 
                 <button
-                    className={mode === "image" ? "primary-btn primary-btn--image" : "primary-btn"}
+                    className={
+                        mode === "image"
+                            ? "primary-btn primary-btn--image"
+                            : "primary-btn primary-btn--text"
+                    }
                     disabled={!canAnalyze() || loading}
                     onClick={runAnalysis}
                 >

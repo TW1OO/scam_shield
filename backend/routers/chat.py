@@ -4,6 +4,7 @@
 /chat/analyze-image : 채팅 스크린샷 1장을 업로드해 대화 추출 후 분석
 """
 
+import asyncio
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from services.chat_service import analyze_chat, extract_messages_from_image, InvalidAIResponseError

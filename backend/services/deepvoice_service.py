@@ -6,8 +6,6 @@ load_dotenv() # .env읽기
 
 API_KEY = os.getenv("REALITY_DEFENDER_API_KEY") # api키 가져오기
 
-client = RealityDefender(api_key=API_KEY) # 클라이언트 생성
-
 # Reality Defender의 overall status는 문서상 "MANIPULATED"/"AUTHENTIC" 둘 중
 # 하나로 안내되지만, 실제로는 음성이 너무 짧거나 분석 불가한 경우
 # "NOT_APPLICABLE"도 반환된다. 이건 "가짜로 판정"된 게 아니라 "판단 불가"이므로
@@ -20,6 +18,11 @@ def detect_ai_voice(audio_path: str):
     """
     저장된 음성 파일을 AI 음성 탐지 API로 분석한다.
     """
+    # SDK가 내부적으로 aiohttp 세션을 만들어 최초 호출 시점의 이벤트 루프에
+    # 묶어버린다. 클라이언트를 전역으로 재사용하면 이후 요청이 다른 스레드/루프
+    # 에서 실행될 때 "Timeout context manager should be used inside a task" 같은
+    # 오류로 이어지므로, 매 호출마다 새 클라이언트를 만들어 이 문제를 피한다.
+    client = RealityDefender(api_key=API_KEY)
     result = client.detect_file(audio_path)
     status = result["status"]
 

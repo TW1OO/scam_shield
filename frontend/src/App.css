@@ -271,6 +271,12 @@ body::before{
 
 }
 
+.logo-section .logo-title{
+    font-size:22px;
+    font-weight:bold;
+    margin-right:8px;
+}
+
 .ai-chip{
 
     position:relative;
@@ -638,6 +644,44 @@ body::before{
 
 }
 
+.selected-file{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+    margin-top:10px;
+
+    padding:10px 14px;
+
+    border-radius:12px;
+
+    background:#F8FAFC;
+
+    font-size:14px;
+
+    color:var(--sub);
+
+}
+
+.selected-file .remove-btn{
+
+    padding:6px 12px;
+
+    border:none;
+
+    border-radius:8px;
+
+    font-size:13px;
+
+    cursor:pointer;
+
+}
+
 
 /* ==========================================
    Dashboard
@@ -921,6 +965,24 @@ body::before{
 
     z-index:2;
 
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.scan-center-icon{
+
+    margin-left:28px;
+
+    margin-bottom:18px;
+
+    width: 120px;
+
+    height: 120px;
+
+    object-fit:contain;
+
+    filter: brightness(0) invert(1);
 }
 
 .scan-title{
@@ -1099,6 +1161,128 @@ body::before{
     color:var(--sub);
 
     font-size:12px;
+
+}
+
+.message-list{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+.message-row{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.message-row input{
+
+    padding:10px 12px;
+
+    border:1px solid var(--line);
+
+    border-radius:12px;
+
+    background:var(--bg);
+
+    outline:none;
+
+    font-size:14px;
+
+}
+
+.message-row input:focus{
+
+    background:white;
+
+    box-shadow:0 0 0 3px rgba(37,99,235,.12);
+
+}
+
+.message-name{
+
+    flex:1;
+
+    min-width:0;
+
+}
+
+.message-content{
+
+    flex:0 0 90px;
+
+}
+
+.message-remove{
+
+    flex:0 0 auto;
+
+    width:28px;
+
+    height:28px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:var(--danger);
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+.message-remove:hover{
+
+    background:#DC2626;
+
+}
+
+.message-add-btn{
+
+    width:100%;
+
+    padding:12px;
+
+    border:2px dashed #CBD5E1;
+
+    border-radius:12px;
+
+    background:var(--bg);
+
+    color:var(--primary);
+
+    font-weight:600;
+
+    cursor:pointer;
+
+}
+
+.message-add-btn:hover{
+
+    border-color:var(--primary);
+
+    background:var(--primary-bg);
 
 }
 
@@ -2100,7 +2284,26 @@ input:focus-visible{
 
 }
 
+.primary-btn:not(:disabled){
+
+    background:linear-gradient(
+        135deg,
+        #2563EB,
+        #3B82F6
+    );
+
+    box-shadow:
+        0 10px 24px rgba(37,99,235,.25);
+
+}
+
 .primary-btn--image{
+
+    margin-top:20px;
+
+}
+
+.primary-btn--text{
 
     margin-top:20px;
 

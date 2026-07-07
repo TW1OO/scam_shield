@@ -35,7 +35,7 @@ export default function Header() {
             </div>
 
             <div>
-              <p className="logo-title">ScamShield</p>
+              <p className="logo-title">TrustChain</p>
               <p>AI Fraud Detection</p>
             </div>
           </div>
